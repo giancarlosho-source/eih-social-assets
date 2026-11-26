@@ -1,0 +1,27 @@
+name: Materialize WBC image
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  materialize:
+    if: github.event.head_commit.message != 'Add Wooden Bat Classic Instagram image'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode JPEG and commit it
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p wbc
+          base64 -d _tmp/wbc-ig-2027.jpg.b64 > wbc/wbc-ig-2027.jpg
+          actual=$(sha256sum wbc/wbc-ig-2027.jpg | awk '{print $1}')
+          test "$actual" = "1b526af9b0a34addb11b5da36e6456552ef3e9ca4120fe4c07a4dd9609bb32b8"
+          git config user.name "giancarlosho-source"
+          git config user.email "giancarlosho@gmail.com"
+          git rm -f _tmp/wbc-ig-2027.jpg.b64 .github/workflows/materialize-wbc.yml
+          git add wbc/wbc-ig-2027.jpg
+          git commit -m "Add Wooden Bat Classic Instagram image"
+          git push origin main
